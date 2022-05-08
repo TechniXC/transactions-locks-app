@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    root: DEBUG
+
+spring:
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+          consumer-properties:
+            max.poll.records: 10
+            min.fetch.bytes: 5000
+            fetch.max.wait.ms: 1000
+      bindings:
+        likesConsumer-in-0:
+          destination: ru.jpoint.likes
+          group: likes-consumer-group
+          consumer:
+            batch-mode: true
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        ddl-auto: none
+        show_sql: true
+        format_sql: true
+  datasource:
+    hikari:
+      transaction-isolation: TRANSACTION_REPEATABLE_READ # TRANSACTION_READ_UNCOMMITTED / TRANSACTION_READ_COMMITTED / TRANSACTION_REPEATABLE_READ / TRANSACTION_SERIALIZABLE
+    url: jdbc:postgresql://localhost:5432/database?currentSchema=jpoint
+    username: postgres
+    password: password
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    timeout: 500ms
