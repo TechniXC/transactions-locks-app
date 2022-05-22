@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.jpoint.transactionslocksapp.dto.Likes;
+import ru.jpoint.transactionslocksapp.repository.SpeakersRepository;
 import ru.jpoint.transactionslocksapp.service.SpeakerService;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.stream.Stream;
 public class SpeakerMessageProcessor {
 
     private final SpeakerService speakerService;
+    private final SpeakersRepository speakersRepository;
 
     //    Helpful??
     //    @Transactional
@@ -52,16 +54,39 @@ public class SpeakerMessageProcessor {
         log.info("Aggregated {}", accumulatedLikes);
 
         try {
-            CompletableFuture<?>[] futures = accumulatedLikes.stream()
-//            CompletableFuture<?>[] futures = likes.stream()
-                    .map(like -> CompletableFuture.runAsync(() -> speakerService.addLikesToSpeaker(like)))
+//            CompletableFuture<?>[] futures = accumulatedLikes.stream()
+            CompletableFuture<?>[] futures = likes.stream()
+                    .map(like -> CompletableFuture.runAsync(() -> {
+                        if (Objects.nonNull(like.getSpeakerId())) {
+                            addLikesById(like.getSpeakerId(), like.getLikes());
+                        } else if (Objects.nonNull(like.getTalkName())) {
+                            addLikesByTalkName(like.getTalkName(), like.getLikes());
+                        } else {
+                            log.error("Error during adding likes, no IDs given");
+                        }
+                    }))
+//                    .map(like -> CompletableFuture.runAsync(() -> speakerService.addLikesToSpeaker(like)))
                     .toArray(CompletableFuture[]::new);
             CompletableFuture.allOf(futures).join();
         } catch (CompletionException ex) {
             log.error("Something went wrong", ex);
         }
+    }
 
+    private void addLikesById(Long id, int likesAmount) {
+        speakersRepository.findById(id).ifPresentOrElse(speaker -> {
+            speaker.setLikes(speaker.getLikes() + likesAmount);
+            speakersRepository.saveAndFlush(speaker);
+            log.info("{} likes added to {}", likesAmount, speaker.getFirstName() + " " + speaker.getLastName());
+        }, () -> log.warn("Speaker with id {} not found", id));
+    }
 
+    private void addLikesByTalkName(String talkName, int likesAmount) {
+        speakersRepository.findByTalkName(talkName).ifPresentOrElse(speaker -> {
+            speaker.setLikes(speaker.getLikes() + likesAmount);
+            speakersRepository.saveAndFlush(speaker);
+            log.info("{} likes added to {}", likesAmount, speaker.getFirstName() + " " + speaker.getLastName());
+        }, () -> log.warn("Speaker with talk {} not found", talkName));
     }
 
 }

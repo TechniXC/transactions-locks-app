@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import ru.jpoint.transactionslocksapp.entities.SpeakerEntity;
 import ru.jpoint.transactionslocksapp.service.SpeakerService;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Random;
 
 @RestController
@@ -29,6 +31,17 @@ public class SpeakerController {
                 .build();
         var result = service.saveSpeaker(speaker);
         return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/addLike/${speakerId}")
+    public ResponseEntity<SpeakerEntity> updateSpeaker(Long speakerId) {
+        var currentSpeaker = service.getSpeaker(speakerId, null);
+        if (Objects.nonNull(currentSpeaker)) {
+            currentSpeaker.setLikes(currentSpeaker.getLikes() + 1);
+            var result = service.saveSpeaker(currentSpeaker);
+            return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     private String randomString() {

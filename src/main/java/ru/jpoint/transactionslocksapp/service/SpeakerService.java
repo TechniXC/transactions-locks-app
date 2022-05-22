@@ -25,20 +25,55 @@ public class SpeakerService {
     //    @Transactional
     public void addLikesToSpeaker(Likes likes) {
         if (Objects.nonNull(likes.getSpeakerId())) {
+                addLikesById(likes.getSpeakerId(), likes.getLikes());
+        } else if (Objects.nonNull(likes.getTalkName())) {
+                addLikesByTalkName(likes.getTalkName(), likes.getLikes());
+        } else {
+            log.error("Error during adding likes, no IDs given");
+        }
+    }
+
+    public void addLikesToSpeakerWithBadRedis(Likes likes) {
+        if (Objects.nonNull(likes.getSpeakerId())) {
+            redisLockProvider.tryToAcquireBadLock(likes.getSpeakerId().toString(), Duration.ofSeconds(2));
+            addLikesById(likes.getSpeakerId(), likes.getLikes());
+            redisLockProvider.releaseLock(likes.getSpeakerId().toString());
+        } else if (Objects.nonNull(likes.getTalkName())) {
+            redisLockProvider.tryToAcquireBadLock(likes.getTalkName(), Duration.ofSeconds(2));
+            addLikesByTalkName(likes.getTalkName(), likes.getLikes());
+            redisLockProvider.releaseLock(likes.getTalkName());
+        } else {
+            log.error("Error during adding likes, no IDs given");
+        }
+    }
+
+    public void addLikesToSpeakerWithRedis(Likes likes) {
+        if (Objects.nonNull(likes.getSpeakerId())) {
             if (redisLockProvider.tryToAcquireLockForScheduling(likes.getSpeakerId().toString(), Duration.ofSeconds(2))) {
                 addLikesById(likes.getSpeakerId(), likes.getLikes());
+                redisLockProvider.releaseLock(likes.getSpeakerId().toString());
             } else {
                 createTask(likes);
             }
         } else if (Objects.nonNull(likes.getTalkName())) {
             if (redisLockProvider.tryToAcquireLockForScheduling(likes.getTalkName(), Duration.ofSeconds(2))) {
                 addLikesByTalkName(likes.getTalkName(), likes.getLikes());
+                redisLockProvider.releaseLock(likes.getTalkName());
             } else {
                 createTask(likes);
             }
         } else {
             log.error("Error during adding likes, no IDs");
         }
+    }
+
+    public SpeakerEntity getSpeaker(Long id, String talkName) {
+        if (Objects.nonNull(id)) {
+            return speakersRepository.findById(id).orElse(null);
+        } else if (Objects.nonNull(talkName)) {
+            return speakersRepository.findByTalkName(talkName).orElse(null);
+        }
+        throw new IllegalArgumentException("No parameters to find speaker given!");
     }
 
     public SpeakerEntity saveSpeaker(SpeakerEntity speaker) {
@@ -54,22 +89,18 @@ public class SpeakerService {
     }
 
     private void addLikesById(Long id, int likesAmount) {
-//        redisLockProvider.tryToAcquireBadLock(id.toString(), Duration.ofSeconds(2));
         speakersRepository.findById(id).ifPresentOrElse(speaker -> {
             speaker.setLikes(speaker.getLikes() + likesAmount);
             speakersRepository.saveAndFlush(speaker);
             log.info("{} likes added to {}", likesAmount, speaker.getFirstName() + " " + speaker.getLastName());
         }, () -> log.warn("Speaker with id {} not found", id));
-        redisLockProvider.releaseLock(id.toString());
     }
 
     private void addLikesByTalkName(String talkName, int likesAmount) {
-//        redisLockProvider.tryToAcquireBadLock(talkName, Duration.ofSeconds(2));
         speakersRepository.findByTalkName(talkName).ifPresentOrElse(speaker -> {
             speaker.setLikes(speaker.getLikes() + likesAmount);
             speakersRepository.saveAndFlush(speaker);
             log.info("{} likes added to {}", likesAmount, speaker.getFirstName() + " " + speaker.getLastName());
         }, () -> log.warn("Speaker with talk {} not found", talkName));
-        redisLockProvider.releaseLock(talkName);
     }
 }
