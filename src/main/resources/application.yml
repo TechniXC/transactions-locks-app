@@ -32,7 +32,7 @@ spring:
         format_sql: true
   datasource:
     hikari:
-      transaction-isolation: TRANSACTION_REPEATABLE_READ # TRANSACTION_READ_UNCOMMITTED / TRANSACTION_READ_COMMITTED / TRANSACTION_REPEATABLE_READ / TRANSACTION_SERIALIZABLE
+      transaction-isolation: TRANSACTION_READ_COMMITTED # TRANSACTION_READ_UNCOMMITTED / TRANSACTION_READ_COMMITTED / TRANSACTION_REPEATABLE_READ / TRANSACTION_SERIALIZABLE
     url: jdbc:postgresql://localhost:5432/database?currentSchema=jpoint
     username: postgres
     password: password

@@ -3,6 +3,7 @@ package ru.jpoint.transactionslocksapp.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,8 +34,8 @@ public class SpeakerController {
         return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/addLike/${speakerId}")
-    public ResponseEntity<SpeakerEntity> updateSpeaker(Long speakerId) {
+    @PostMapping("/addLike/{speakerId}")
+    public ResponseEntity<SpeakerEntity> updateSpeaker(@PathVariable Long speakerId) {
         var currentSpeaker = service.getSpeaker(speakerId, null);
         if (Objects.nonNull(currentSpeaker)) {
             currentSpeaker.setLikes(currentSpeaker.getLikes() + 1);

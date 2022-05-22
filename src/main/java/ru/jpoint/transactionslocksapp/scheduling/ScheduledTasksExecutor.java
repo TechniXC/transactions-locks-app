@@ -21,7 +21,7 @@ public class ScheduledTasksExecutor {
     private final SpeakerService speakerService;
     private final ScheduledTasksRepository tasksRepository;
 
-    @Scheduled(cron = "0 * * ? * *")
+    @Scheduled(cron = "* * * ? * *")
     @SchedulerLock(name = "ScheduledTasksExecutor")
     public void executeScheduledLikeTask() {
         tasksRepository.findAllByTaskTypeAndCompleted("Likes", false).forEach(task -> {

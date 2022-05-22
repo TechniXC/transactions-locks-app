@@ -36,6 +36,7 @@ public class SpeakerEntity {
     @Column(updatable = false, nullable = false)
     private LocalDateTime created;
 
+//    @Version
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updated;
