@@ -1,60 +1,34 @@
 package ru.jpoint.transactionslocksapp.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.jpoint.transactionslocksapp.entities.SpeakerEntity;
+import ru.jpoint.transactionslocksapp.dto.Likes;
 import ru.jpoint.transactionslocksapp.service.SpeakerService;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Random;
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class SpeakerController {
 
     private final SpeakerService service;
 
-    @PostMapping("/create/")
-    public ResponseEntity<SpeakerEntity> createSpeaker() {
-        var speaker = SpeakerEntity.builder()
-                .FirstName(randomString())
-                .LastName(randomString())
-                .talkName(randomString())
-                .likes(0)
-                .created(LocalDateTime.now())
-                .updated(LocalDateTime.now())
-                .build();
-        var result = service.saveSpeaker(speaker);
-        return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
-    }
-
-    @PostMapping("/addLike/{speakerId}")
-    public ResponseEntity<SpeakerEntity> updateSpeaker(@PathVariable Long speakerId) {
-        var currentSpeaker = service.getSpeaker(speakerId, null);
-        if (Objects.nonNull(currentSpeaker)) {
-            currentSpeaker.setLikes(currentSpeaker.getLikes() + 1);
-            var result = service.saveSpeaker(currentSpeaker);
-            return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
+    @PostMapping("/addlikes")
+    public ResponseEntity<String> updateSpeaker(@RequestBody Likes likes) {
+        try {
+            service.addLikesToSpeaker(likes);
+            //<editor-fold desc="What if we will create the task, instead of waiting the end of process?">
+//            service.createTaskToAddLikes(likes);
+            //</editor-fold>
+            return new ResponseEntity<>("Likes successfully added.", HttpStatus.ACCEPTED);
+        } catch (Exception ex) {
+            log.warn("Exception in controller:", ex);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
-    private String randomString() {
-        int leftLimit = 97; // letter 'a'
-        int rightLimit = 122; // letter 'z'
-        int targetStringLength = 10;
-        Random random = new Random();
-
-        return random.ints(leftLimit, rightLimit + 1)
-                .limit(targetStringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
-    }
-
 }

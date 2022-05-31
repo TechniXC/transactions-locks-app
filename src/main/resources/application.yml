@@ -3,7 +3,7 @@ server:
 
 logging:
   level:
-    root: DEBUG
+    root: INFO
 
 spring:
   cloud:
@@ -12,16 +12,22 @@ spring:
         binder:
           brokers: localhost:9092
           auto-create-topics: true
+          auto-add-partitions: true
           consumer-properties:
             max.poll.records: 10
             min.fetch.bytes: 5000
             fetch.max.wait.ms: 1000
+#            interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
       bindings:
         likesConsumer-in-0:
           destination: ru.jpoint.likes
           group: likes-consumer-group
           consumer:
-            batch-mode: true
+            max-attempts: 1
+            batch-mode: false
+            concurrency: 5
+        likesProducer-out-0:
+          destination: ru.jpoint.likes
   jpa:
     open-in-view: false
     properties:
@@ -41,3 +47,5 @@ spring:
     host: localhost
     port: 6379
     timeout: 500ms
+
+

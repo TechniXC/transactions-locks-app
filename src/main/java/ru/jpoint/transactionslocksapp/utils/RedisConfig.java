@@ -1,4 +1,4 @@
-package ru.jpoint.transactionslocksapp.config;
+package ru.jpoint.transactionslocksapp.utils;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +12,6 @@ public class RedisConfig {
     public RedisTemplate<String, Boolean> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Boolean> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
-        // Add some specific configuration here. Key serializers, etc.
         return template;
     }
 }

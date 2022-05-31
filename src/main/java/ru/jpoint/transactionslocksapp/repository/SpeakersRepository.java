@@ -13,20 +13,28 @@ import java.util.Optional;
 @Repository
 public interface SpeakersRepository extends JpaRepository<SpeakerEntity, Long> {
 
+    //<editor-fold desc="Optimistic Lock">
 //    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
-//        @Lock(LockModeType.PESSIMISTIC_WRITE)
-//        @QueryHints({
-//                @QueryHint(name = "javax.persistence.query.timeout", value = "2000"),
-//    //            @QueryHint(name = "javax.persistence.query.timeout", value = "-2")
-//        })
+    //</editor-fold>
+    //<editor-fold desc="Pessimistic Lock">
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @QueryHints({
+//            @QueryHint(name = "javax.persistence.query.timeout", value = "2000"),
+//            //            @QueryHint(name = "javax.persistence.query.timeout", value = "-2")
+//    })
+    //</editor-fold>
     Optional<SpeakerEntity> findByTalkName(String talkName);
 
-//        @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
-//        @Lock(LockModeType.PESSIMISTIC_WRITE)
-//        @QueryHints({
-//                @QueryHint(name = "javax.persistence.query.timeout", value = "2000"),
-//    //            @QueryHint(name = "javax.persistence.query.timeout", value = "-2")
-//        })
+    //<editor-fold desc="Optimistic Lock">
+//    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
+    //</editor-fold>
+    //<editor-fold desc="Pessimistic Lock">
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @QueryHints({
+//            @QueryHint(name = "javax.persistence.query.timeout", value = "2000"),
+//            //            @QueryHint(name = "javax.persistence.query.timeout", value = "-2")
+//    })
+    //</editor-fold>
     @Override
     Optional<SpeakerEntity> findById(Long aLong);
 }

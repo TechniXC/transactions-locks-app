@@ -6,8 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EnableScheduling
-@EnableSchedulerLock(defaultLockAtMostFor = "PT30S")
 public class TransactionsLocksAppApplication {
 
     public static void main(String[] args) {

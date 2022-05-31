@@ -16,6 +16,9 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://packages.confluent.io/maven"
+    }
 }
 
 ext {
@@ -31,16 +34,17 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter'
     implementation 'org.springframework.cloud:spring-cloud-stream'
     implementation "org.springframework.cloud:spring-cloud-stream-binder-kafka"
-    implementation "net.javacrumbs.shedlock:shedlock-spring:4.34.0"
-    implementation "net.javacrumbs.shedlock:shedlock-provider-jdbc-template:4.34.0"
-    implementation "com.vladmihalcea:hibernate-types-52:2.9.5"
+    implementation 'org.postgresql:postgresql'
+
     compileOnly 'org.projectlombok:lombok'
     compileOnly 'org.flywaydb:flyway-core:8.5.10'
-    runtimeOnly 'org.postgresql:postgresql'
+
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.batch:spring-batch-test'
+
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.testcontainers:kafka'
