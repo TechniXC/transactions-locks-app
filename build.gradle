@@ -35,9 +35,9 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-stream'
     implementation "org.springframework.cloud:spring-cloud-stream-binder-kafka"
     implementation 'org.postgresql:postgresql'
+    implementation 'org.flywaydb:flyway-core:8.5.10'
 
     compileOnly 'org.projectlombok:lombok'
-    compileOnly 'org.flywaydb:flyway-core:8.5.10'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
@@ -49,6 +49,10 @@ dependencies {
     testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.testcontainers:kafka'
 
+}
+
+jar {
+    jar.enabled = false
 }
 
 dependencyManagement {

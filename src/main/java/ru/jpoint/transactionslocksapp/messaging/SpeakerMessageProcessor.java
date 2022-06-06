@@ -30,7 +30,7 @@ public class SpeakerMessageProcessor {
         var accumulatedLikes = Stream.concat(
                         likes.stream()
                                 .filter(Objects::nonNull)
-                                .filter(x -> Objects.nonNull(x.getSpeakerId()))
+                                .filter(x -> x.getSpeakerId() != null)
                                 .collect(Collectors.groupingBy(Likes::getSpeakerId))
                                 .values().stream()
                                 .map(likesList -> likesList.stream().reduce(new Likes(), (x, y) -> Likes.builder()
@@ -39,6 +39,7 @@ public class SpeakerMessageProcessor {
                                         .build())),
                         likes.stream()
                                 .filter(Objects::nonNull)
+                                .filter(x -> x.getTalkName() != null)
                                 .filter(x -> !x.getTalkName().isEmpty())
                                 .collect(Collectors.groupingBy(Likes::getTalkName))
                                 .values().stream()
@@ -55,7 +56,7 @@ public class SpeakerMessageProcessor {
                     .toArray(CompletableFuture[]::new);
             CompletableFuture.allOf(futures).join();
         } catch (CompletionException ex) {
-            log.error("Something went wrong:", ex);
+            log.error("Something went wrong during batch processing.:", ex);
         }
     }
     //</editor-fold>

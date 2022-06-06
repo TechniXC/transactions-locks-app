@@ -5,7 +5,4 @@ import ru.jpoint.transactionslocksapp.service.SpeakerService;
 
 class TransactionsLocksAppApplicationTests extends AbstractIntegrationTest {
 
-    @Autowired
-    SpeakerService speakerService;
-
 }

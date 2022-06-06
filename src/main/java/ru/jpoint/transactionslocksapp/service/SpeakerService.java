@@ -3,7 +3,10 @@ package ru.jpoint.transactionslocksapp.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.jpoint.transactionslocksapp.dto.Likes;
 import ru.jpoint.transactionslocksapp.entities.SpeakerEntity;
 import ru.jpoint.transactionslocksapp.repository.SpeakersRepository;
@@ -27,8 +30,8 @@ public class SpeakerService {
      * @param likes DTO with information about likes to be added.
      */
 //    @Transactional
+//    @Retryable(Exception.class)
     public void addLikesToSpeaker(Likes likes) {
-//        try {
         if (likes.getSpeakerId() != null) {
             addLikesById(likes.getSpeakerId(), likes.getLikes());
         } else if (likes.getTalkName() != null) {
@@ -36,12 +39,15 @@ public class SpeakerService {
         } else {
             log.error("Error during adding likes, no IDs given");
         }
-//        } catch (Exception ex) {
-//            log.error("Possibly concurrent updates, task will be created!", ex);
-//            createTaskToAddLikes(likes);
-//        }
-
     }
+
+    //<editor-fold desc="Recover method for retry. Task recreation.">
+//    @Transactional
+//    @Recover
+//    public void addLikesToSpeakerRecover(Exception ex, Likes likes) {
+//        createTaskToAddLikes(likes);
+//    }
+    //</editor-fold>
 
     /**
      * Method for creating task to add likes to speaker.
@@ -73,15 +79,20 @@ public class SpeakerService {
     //<editor-fold desc="Initialize Speaker database.">
     @PostConstruct
     private void initSpeakers() {
-        speakersRepository.deleteAll();
-        var speaker = SpeakerEntity.builder()
-                .id(1L)
-                .FirstName("John")
-                .LastName("Doe")
-                .likes(0)
-                .talkName("Spring best practice")
-                .build();
-        speakersRepository.save(speaker);
+        try {
+            speakersRepository.deleteAll();
+            var speaker = SpeakerEntity.builder()
+                    .id(1L)
+                    .FirstName("John")
+                    .LastName("Doe")
+                    .likes(0)
+                    .talkName("Spring best practice")
+                    .build();
+            speakersRepository.save(speaker);
+        } catch (Exception ex) {
+            log.warn("Cant initialize DB");
+        }
+
     }
     //</editor-fold>
 

@@ -3,7 +3,10 @@ server:
 
 logging:
   level:
-    root: INFO
+    root: WARN
+    org:
+      springframework:
+        transaction: TRACE
 
 spring:
   cloud:
@@ -14,17 +17,18 @@ spring:
           auto-create-topics: true
           auto-add-partitions: true
           consumer-properties:
-            max.poll.records: 10
+            max.poll.records: 200
             min.fetch.bytes: 5000
-            fetch.max.wait.ms: 1000
+            fetch.max.wait.ms: 100
 #            interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
       bindings:
         likesConsumer-in-0:
           destination: ru.jpoint.likes
           group: likes-consumer-group
           consumer:
-            max-attempts: 1
-            batch-mode: false
+            maxAttempts: 1
+            backOffInitialInterval: 1000
+#            batch-mode: true
             concurrency: 5
         likesProducer-out-0:
           destination: ru.jpoint.likes
@@ -34,8 +38,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         ddl-auto: none
-        show_sql: true
-        format_sql: true
+#        show_sql: true
+#        format_sql: true
   datasource:
     hikari:
       transaction-isolation: TRANSACTION_READ_COMMITTED # TRANSACTION_READ_UNCOMMITTED / TRANSACTION_READ_COMMITTED / TRANSACTION_REPEATABLE_READ / TRANSACTION_SERIALIZABLE
