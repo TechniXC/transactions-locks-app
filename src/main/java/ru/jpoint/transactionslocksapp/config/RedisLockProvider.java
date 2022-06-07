@@ -1,4 +1,4 @@
-package ru.jpoint.transactionslocksapp.utils;
+package ru.jpoint.transactionslocksapp.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

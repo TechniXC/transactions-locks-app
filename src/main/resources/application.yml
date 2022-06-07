@@ -1,12 +1,27 @@
 server:
   port: 8080
+  tomcat:
+    mbeanregistry:
+      enabled: true
 
 logging:
   level:
     root: WARN
+    ru:
+      jpoint:
+        transactionslocksapp: DEBUG
     org:
       springframework:
         transaction: TRACE
+
+management:
+  metrics:
+    tags:
+      application: transactions-locks-app
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
 
 spring:
   cloud:
@@ -20,14 +35,13 @@ spring:
             max.poll.records: 200
             min.fetch.bytes: 5000
             fetch.max.wait.ms: 100
-#            interceptor.classes: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
       bindings:
         likesConsumer-in-0:
           destination: ru.jpoint.likes
           group: likes-consumer-group
           consumer:
-            maxAttempts: 1
-            backOffInitialInterval: 1000
+            max-attempts: 1
+            back-off-initial-interval: 1000
 #            batch-mode: true
             concurrency: 5
         likesProducer-out-0:

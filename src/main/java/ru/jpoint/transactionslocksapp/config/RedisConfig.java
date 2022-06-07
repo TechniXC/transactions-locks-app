@@ -1,4 +1,4 @@
-package ru.jpoint.transactionslocksapp.utils;
+package ru.jpoint.transactionslocksapp.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

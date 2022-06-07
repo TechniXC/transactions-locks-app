@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.jpoint.transactionslocksapp.dto.Likes;
 import ru.jpoint.transactionslocksapp.entities.SpeakerEntity;
 import ru.jpoint.transactionslocksapp.repository.SpeakersRepository;
-import ru.jpoint.transactionslocksapp.utils.RedisLockProvider;
+import ru.jpoint.transactionslocksapp.config.RedisLockProvider;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
