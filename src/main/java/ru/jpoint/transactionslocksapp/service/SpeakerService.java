@@ -24,11 +24,11 @@ public class SpeakerService {
      * @param likes DTO with information about likes to be added.
      */
     public void addLikesToSpeaker(Likes likes) {
-        log.warn("No JDBC connection now!");
         if (likes.getTalkName() != null) {
             speakersRepository.findByTalkName(likes.getTalkName()).ifPresentOrElse(speaker -> {
                 saveMessageToHistory(likes, "RECEIVED");
                 speaker.setLikes(speaker.getLikes() + likes.getLikes());
+                speakersRepository.save(speaker);
                 log.info("{} likes added to {}", likes.getLikes(), speaker.getFirstName() + " " + speaker.getLastName());
             }, () -> {
                 log.warn("Speaker with talk {} not found", likes.getTalkName());

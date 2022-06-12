@@ -1,25 +1,16 @@
 server:
   port: 8080
-  tomcat:
-    mbeanregistry:
-      enabled: true
+  tomcat.mbeanregistry.enabled: true
 
 logging:
   level:
     root: WARN
-    ru:
-      jpoint:
-        transactionslocksapp: DEBUG
-    org:
-      springframework:
-        orm.jpa: DEBUG
+    ru.jpoint.transactionslocksapp: DEBUG
+    org.springframework.orm.jpa: DEBUG
 
 spring:
-  sql:
-    init:
-      mode: always
-  #  main:
-#    allow-circular-references: true
+  sql.init.mode: always
+#  main.allow-circular-references: true
   cloud:
     stream:
       kafka:
@@ -51,19 +42,15 @@ spring:
   datasource:
     hikari:
       transaction-isolation: TRANSACTION_READ_COMMITTED # TRANSACTION_READ_COMMITTED / TRANSACTION_REPEATABLE_READ / TRANSACTION_SERIALIZABLE
-#      maximum-pool-size: 10
+      maximum-pool-size: 10
+#      connection-timeout: 5000
 #      auto-commit: off
     url: jdbc:postgresql://localhost:5432/database?currentSchema=jpoint
     username: postgres
     password: password
 
 management:
-  metrics:
-    tags:
-      application: transactions-locks-app
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
+  metrics.tags.application: transactions-locks-app
+  endpoints.web.exposure.include: health,info,prometheus
 
 
