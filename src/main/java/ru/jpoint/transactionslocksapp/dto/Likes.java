@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Likes {
 
-    @JsonProperty("speakerId")
-    private Long speakerId;
-
     @JsonProperty("talkName")
     private String talkName;
 

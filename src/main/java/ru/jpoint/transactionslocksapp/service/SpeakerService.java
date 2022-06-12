@@ -3,18 +3,11 @@ package ru.jpoint.transactionslocksapp.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.jpoint.transactionslocksapp.dto.Likes;
-import ru.jpoint.transactionslocksapp.entities.SpeakerEntity;
+import ru.jpoint.transactionslocksapp.entities.HistoryEntity;
+import ru.jpoint.transactionslocksapp.repository.HistoryRepository;
 import ru.jpoint.transactionslocksapp.repository.SpeakersRepository;
-import ru.jpoint.transactionslocksapp.config.RedisLockProvider;
-
-import javax.annotation.PostConstruct;
-import java.time.Duration;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -22,6 +15,7 @@ import java.util.Objects;
 public class SpeakerService {
 
     private final SpeakersRepository speakersRepository;
+    private final HistoryRepository historyRepository;
     private final StreamBridge streamBridge;
 
     /**
@@ -29,25 +23,22 @@ public class SpeakerService {
      *
      * @param likes DTO with information about likes to be added.
      */
-//    @Transactional
-//    @Retryable(Exception.class)
     public void addLikesToSpeaker(Likes likes) {
-        if (likes.getSpeakerId() != null) {
-            addLikesById(likes.getSpeakerId(), likes.getLikes());
-        } else if (likes.getTalkName() != null) {
-            addLikesByTalkName(likes.getTalkName(), likes.getLikes());
+        log.warn("No JDBC connection now!");
+        if (likes.getTalkName() != null) {
+            speakersRepository.findByTalkName(likes.getTalkName()).ifPresentOrElse(speaker -> {
+                saveMessageToHistory(likes, "RECEIVED");
+                speaker.setLikes(speaker.getLikes() + likes.getLikes());
+                log.info("{} likes added to {}", likes.getLikes(), speaker.getFirstName() + " " + speaker.getLastName());
+            }, () -> {
+                log.warn("Speaker with talk {} not found", likes.getTalkName());
+                saveMessageToHistory(likes, "ORPHANED");
+            });
         } else {
             log.error("Error during adding likes, no IDs given");
+            saveMessageToHistory(likes, "CORRUPTED");
         }
     }
-
-    //<editor-fold desc="Recover method for retry. Task recreation.">
-//    @Transactional
-//    @Recover
-//    public void addLikesToSpeakerRecover(Exception ex, Likes likes) {
-//        createTaskToAddLikes(likes);
-//    }
-    //</editor-fold>
 
     /**
      * Method for creating task to add likes to speaker.
@@ -59,65 +50,21 @@ public class SpeakerService {
         streamBridge.send("likesProducer-out-0", likes);
     }
 
-    private void addLikesById(Long id, int likesAmount) {
-        speakersRepository.findById(id).ifPresentOrElse(speaker -> {
-            speaker.setLikes(speaker.getLikes() + likesAmount);
-            speakersRepository.save(speaker);
-            log.info("{} likes added to {}", likesAmount, speaker.getFirstName() + " " + speaker.getLastName());
-        }, () -> log.warn("Speaker with id {} not found", id));
-    }
-
-    private void addLikesByTalkName(String talkName, int likesAmount) {
-        speakersRepository.findByTalkName(talkName).ifPresentOrElse(speaker -> {
-            speaker.setLikes(speaker.getLikes() + likesAmount);
-            speakersRepository.save(speaker);
-            log.info("{} likes added to {}", likesAmount, speaker.getFirstName() + " " + speaker.getLastName());
-        }, () -> log.warn("Speaker with talk {} not found", talkName));
-
-    }
-
-    //<editor-fold desc="Initialize Speaker database.">
-    @PostConstruct
-    private void initSpeakers() {
+    /**
+     * Method for saving message to history.
+     * Produces the message with DTO to kafka, for future processing.
+     *
+     * @param likes DTO with information about likes to be added.
+     */
+    private void saveMessageToHistory(Likes likes, String status) {
         try {
-            speakersRepository.deleteAll();
-            var speaker = SpeakerEntity.builder()
-                    .id(1L)
-                    .FirstName("John")
-                    .LastName("Doe")
-                    .likes(0)
-                    .talkName("Spring best practice")
-                    .build();
-            speakersRepository.save(speaker);
-        } catch (Exception ex) {
-            log.warn("Cant initialize DB");
-        }
-
-    }
-    //</editor-fold>
-
-    //<editor-fold desc="Adding likes with redis Lock">
-    private final RedisLockProvider redisLockProvider;
-
-    public void addLikesToSpeakerWithRedis(Likes likes) {
-        if (Objects.nonNull(likes.getSpeakerId())) {
-            if (redisLockProvider.tryToAcquireLock(likes.getSpeakerId().toString(), Duration.ofSeconds(2))) {
-                addLikesById(likes.getSpeakerId(), likes.getLikes());
-                redisLockProvider.releaseLock(likes.getSpeakerId().toString());
-            } else {
-                createTaskToAddLikes(likes);
-            }
-        } else if (Objects.nonNull(likes.getTalkName())) {
-            if (redisLockProvider.tryToAcquireLock(likes.getTalkName(), Duration.ofSeconds(2))) {
-                addLikesByTalkName(likes.getTalkName(), likes.getLikes());
-                redisLockProvider.releaseLock(likes.getTalkName());
-            } else {
-                createTaskToAddLikes(likes);
-            }
-        } else {
-            log.error("Error during adding likes, no IDs");
+            historyRepository.save(HistoryEntity.builder()
+                    .talkName(likes.getTalkName())
+                    .likes(likes.getLikes())
+                    .status(status)
+                    .build());
+        } catch (RuntimeException ex) {
+            log.warn("Failed to save message to history.", ex);
         }
     }
-    //</editor-fold>
-
 }

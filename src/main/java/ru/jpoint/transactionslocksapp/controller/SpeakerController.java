@@ -22,9 +22,6 @@ public class SpeakerController {
     public ResponseEntity<String> updateSpeaker(@RequestBody Likes likes) {
         try {
             service.addLikesToSpeaker(likes);
-            //<editor-fold desc="What if we will create the task, instead of waiting the end of process?">
-//            service.createTaskToAddLikes(likes);
-            //</editor-fold>
             return new ResponseEntity<>("Likes successfully added.", HttpStatus.ACCEPTED);
         } catch (Exception ex) {
             log.warn("Exception in controller:", ex);

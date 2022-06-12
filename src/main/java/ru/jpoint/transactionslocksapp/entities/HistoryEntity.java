@@ -2,12 +2,8 @@ package ru.jpoint.transactionslocksapp.entities;
 
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Getter
@@ -16,29 +12,22 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "speakers")
-public class SpeakerEntity {
+@Table(name = "history")
+public class HistoryEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "firstname")
-    private String FirstName;
-
-    @Column(name = "lastname")
-    private String LastName;
 
     @Column(name = "talkname")
     private String talkName;
 
     private int likes;
 
+    private String status;
+
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     private LocalDateTime created;
-
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updated;
 
 }

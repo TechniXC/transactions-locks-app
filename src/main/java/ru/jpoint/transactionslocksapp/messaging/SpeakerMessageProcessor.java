@@ -11,7 +11,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -27,26 +26,16 @@ public class SpeakerMessageProcessor {
     //<editor-fold desc="Batch Processing">
     public void processBatchOfMessages(List<Likes> likes) {
 
-        var accumulatedLikes = Stream.concat(
-                        likes.stream()
-                                .filter(Objects::nonNull)
-                                .filter(x -> x.getSpeakerId() != null)
-                                .collect(Collectors.groupingBy(Likes::getSpeakerId))
-                                .values().stream()
-                                .map(likesList -> likesList.stream().reduce(new Likes(), (x, y) -> Likes.builder()
-                                        .speakerId(y.getSpeakerId())
-                                        .likes(x.getLikes() + y.getLikes())
-                                        .build())),
-                        likes.stream()
-                                .filter(Objects::nonNull)
-                                .filter(x -> x.getTalkName() != null)
-                                .filter(x -> !x.getTalkName().isEmpty())
-                                .collect(Collectors.groupingBy(Likes::getTalkName))
-                                .values().stream()
-                                .map(likesListTalkName -> likesListTalkName.stream().reduce(new Likes(), (x, y) -> Likes.builder()
-                                        .talkName(y.getTalkName())
-                                        .likes(x.getLikes() + y.getLikes())
-                                        .build())))
+        var accumulatedLikes = likes.stream()
+                .filter(Objects::nonNull)
+                .filter(x -> x.getTalkName() != null)
+                .filter(x -> !x.getTalkName().isEmpty())
+                .collect(Collectors.groupingBy(Likes::getTalkName))
+                .values().stream()
+                .map(likesListTalkName -> likesListTalkName.stream().reduce(new Likes(), (x, y) -> Likes.builder()
+                        .talkName(y.getTalkName())
+                        .likes(x.getLikes() + y.getLikes())
+                        .build()))
                 .collect(Collectors.toList());
         log.info("Aggregated Likes: {}", accumulatedLikes);
 

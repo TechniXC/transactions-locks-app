@@ -16,27 +16,20 @@ configurations {
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://packages.confluent.io/maven"
-    }
 }
 
 ext {
     set('springCloudVersion', "2021.0.2")
-    set('testcontainersVersion', "1.17.1")
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.cloud:spring-cloud-starter'
     implementation 'org.springframework.cloud:spring-cloud-stream'
     implementation "org.springframework.cloud:spring-cloud-stream-binder-kafka"
     implementation 'org.postgresql:postgresql'
-    implementation 'org.flywaydb:flyway-core:8.5.10'
     implementation "io.micrometer:micrometer-core:1.9.0"
     implementation "io.micrometer:micrometer-registry-prometheus:1.9.0"
 
@@ -44,13 +37,6 @@ dependencies {
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.batch:spring-batch-test'
-
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation 'org.testcontainers:postgresql'
-    testImplementation 'org.testcontainers:kafka'
 
 }
 
@@ -60,11 +46,6 @@ jar {
 
 dependencyManagement {
     imports {
-        mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
 }

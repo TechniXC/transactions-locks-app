@@ -12,18 +12,14 @@ logging:
         transactionslocksapp: DEBUG
     org:
       springframework:
-        transaction: TRACE
-
-management:
-  metrics:
-    tags:
-      application: transactions-locks-app
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
+        orm.jpa: DEBUG
 
 spring:
+  sql:
+    init:
+      mode: always
+  #  main:
+#    allow-circular-references: true
   cloud:
     stream:
       kafka:
@@ -33,15 +29,13 @@ spring:
           auto-add-partitions: true
           consumer-properties:
             max.poll.records: 200
-            min.fetch.bytes: 5000
             fetch.max.wait.ms: 100
       bindings:
         likesConsumer-in-0:
           destination: ru.jpoint.likes
           group: likes-consumer-group
           consumer:
-            max-attempts: 1
-            back-off-initial-interval: 1000
+            maxAttempts: 1
 #            batch-mode: true
             concurrency: 5
         likesProducer-out-0:
@@ -56,14 +50,20 @@ spring:
 #        format_sql: true
   datasource:
     hikari:
-      transaction-isolation: TRANSACTION_READ_COMMITTED # TRANSACTION_READ_UNCOMMITTED / TRANSACTION_READ_COMMITTED / TRANSACTION_REPEATABLE_READ / TRANSACTION_SERIALIZABLE
+      transaction-isolation: TRANSACTION_READ_COMMITTED # TRANSACTION_READ_COMMITTED / TRANSACTION_REPEATABLE_READ / TRANSACTION_SERIALIZABLE
+#      maximum-pool-size: 10
+#      auto-commit: off
     url: jdbc:postgresql://localhost:5432/database?currentSchema=jpoint
     username: postgres
     password: password
-  redis:
-    database: 0
-    host: localhost
-    port: 6379
-    timeout: 500ms
+
+management:
+  metrics:
+    tags:
+      application: transactions-locks-app
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
 
 
