@@ -23,10 +23,10 @@ public class SpeakerEntity {
     private Long id;
 
     @Column(name = "firstname")
-    private String FirstName;
+    private String firstName;
 
     @Column(name = "lastname")
-    private String LastName;
+    private String lastName;
 
     @Column(name = "talkname")
     private String talkName;
