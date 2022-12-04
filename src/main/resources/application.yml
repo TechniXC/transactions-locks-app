@@ -27,7 +27,7 @@ spring:
           group: likes-consumer-group
           consumer:
             maxAttempts: 1
-#            batch-mode: true
+            batch-mode: true
             concurrency: 5
         likesProducer-out-0:
           destination: ru.jpoint.likes
@@ -42,8 +42,8 @@ spring:
   datasource:
     hikari:
       transaction-isolation: TRANSACTION_READ_COMMITTED # TRANSACTION_READ_COMMITTED / TRANSACTION_REPEATABLE_READ / TRANSACTION_SERIALIZABLE
-      maximum-pool-size: 10
-#      connection-timeout: 5000
+      maximum-pool-size: 1
+      connection-timeout: 5000
 #      auto-commit: off
     url: jdbc:postgresql://localhost:5432/database?currentSchema=jpoint
     username: postgres

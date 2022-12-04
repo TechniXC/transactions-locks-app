@@ -21,7 +21,7 @@ public class SpeakerController {
     @PostMapping("/addlikes")
     public ResponseEntity<String> updateSpeaker(@RequestBody Likes likes) {
         try {
-            service.addLikesToSpeaker(likes);
+            service.createTaskToAddLikes(likes);
             return new ResponseEntity<>("Likes successfully added.", HttpStatus.ACCEPTED);
         } catch (Exception ex) {
             log.warn("Exception in controller:", ex);

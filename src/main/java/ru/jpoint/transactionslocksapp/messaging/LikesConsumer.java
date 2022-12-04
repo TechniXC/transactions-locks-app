@@ -11,19 +11,21 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.backoff.FixedBackOff;
 import ru.jpoint.transactionslocksapp.dto.Likes;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class LikesConsumer implements Consumer<Likes> {
+public class LikesConsumer implements Consumer<List<Likes>> {
 
     private final SpeakerMessageProcessor messageProcessor;
 
     @Override
-    public void accept(Likes likes) {
+    @Transactional
+    public void accept(List<Likes> likes) {
         log.warn("Message received {}", likes);
-        messageProcessor.processOneMessage(likes);
+        messageProcessor.processBatchOfMessages(likes);
     }
 
     @Bean
